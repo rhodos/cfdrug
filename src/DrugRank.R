@@ -798,9 +798,9 @@ PostProcessIds = function(allScores, database){
 }
 
 AppendAnnotation = function(allScores, database){
-  load(DataDir('annot/CMAP_LINCS_map.RData'))
+  load(DataDir('cmap_lincs_compound_mapping.RData'))
   if(database == 'lincs'){
-    load(DataDir('annot/lincs_annot/pertInfo/lincsAnnot_inHouse_pertInfo_allCompounds.RData'))
+    load(DataDir('lincs_compound_metadata.RData'))
 
     #removing Generic Name because it causes problems sometimes when writing to xls
     lincsAnnot = lincsAnnot[,names(lincsAnnot) != 'Generic_Name.inHouse']
@@ -968,12 +968,12 @@ GetATC = function(cmap, colName, annot=GetCMAPAnnot(), topN=1309){
 }
 
 AppendPertIName = function(allScores){
-  load(DataDir('annot/lincs_annot/pertInfo/lincsAnnot_inHouse_pertInfo_allCompounds.RData'))
+  load(DataDir('lincs_compound_metadata.RData'))
   allScores = merge(allScores, lincsAnnot[,c('pert_id', 'pert_iname')], by='pert_id', all=FALSE)
   return(allScores)
 }
 
-LoadScores = function(baseDir=OutputDir('drug_rankings/meta3/internal/newPRLs/')){
+LoadScores = function(baseDir=OutputDir('drug_rankings/')){
   scores = NULL
 
   load(paste0(baseDir, 'ks/allScores_cmap.RData'))

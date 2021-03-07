@@ -33,7 +33,7 @@ LINCS_CS_parallel = function(querySig, signatureBlockFiles, sigFilters=NULL, nPe
   resDat = combRes[order(combRes$score,decreasing=FALSE),]
   
   if(annotFilter){
-    load(DataDir('annot/lincs_annot/pertInfo/lincsAnnot_inHouse_pertInfo_allCompounds.RData'))
+    load(DataDir('lincs_compound_metadata.RData'))
     resDat = resDat[resDat$pert_id %in% lincsAnnot$pert_id,]
   }
   
