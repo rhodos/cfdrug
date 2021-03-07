@@ -1,19 +1,20 @@
 
 library(RankProd)
 library(WGCNA)
+source('src/ConnectivityScores.R')
 
 ComputeAllScores = function(csMetric='ks', database='cmap', debug=FALSE, debugN=5, nCores=1,
-                             calcAll=TRUE, calcSigs=calcAll, calcPathways=calcAll, calcCodims=calcAll,
+                             calcAll=TRUE, calcSigs=calcAll, calcPathways=calcAll, 
                              saveRData=TRUE){
 
   #SetupParallel(nCores)
 
   if(debug){
-    outDir = OutputDir(sprintf('TEST/drug_rankings/debug_%s', csMetric))
+    outDir = OutputDir(sprintf('drug_rankings/TEST_%s/', csMetric))
     rp.perm = 10
     nPerm = 30
   }else{
-    outDir = OutputDir(sprintf('drug_rankings/meta3/internal/newPRLs/%s/', csMetric))
+    outDir = OutputDir(sprintf('drug_rankings/%s/', csMetric))
     rp.perm = 500
     nPerm = 2000
   }
@@ -26,11 +27,13 @@ ComputeAllScores = function(csMetric='ks', database='cmap', debug=FALSE, debugN=
   ### Compute scores for CF signatures
   ####################################################################################################
 
-  if(debug){
-    load(OutputDir('sigs/meta3/allSigs_debug.RData'))
-  }else{
-    load(OutputDir('sigs/meta3/allSigs.RData'))
-  }
+  # if(debug){
+  #   load(OutputDir('sigs/meta3/allSigs_debug.RData'))
+  # }else{
+  #   load(OutputDir('sigs/meta3/allSigs.RData'))
+  # }
+  load(DataDir('cf_core_signatures.RData'))
+  
 
   if(calcSigs){
 
@@ -62,7 +65,7 @@ ComputeAllScores = function(csMetric='ks', database='cmap', debug=FALSE, debugN=
   #if(debug){
   #  load(DataDir('cf_genesets/metacore/metaCore_debug.RData')) # not sure where the debug file is. I think I just kept 2 or 3 of the pathways
   #}else{
-    load(DataDir('cf_genesets/metacore/metaCore.RData'))
+    load(DataDir('cf_pathways.RData'))
   #}
 
   if(calcPathways){
@@ -81,36 +84,13 @@ ComputeAllScores = function(csMetric='ks', database='cmap', debug=FALSE, debugN=
   }
 
   ####################################################################################################
-  ### Compute scores for CF codims
-  ####################################################################################################
-  #if(debug){
-  #  load(DataDir('cf_genesets/cfCodims_5_14.RData'))
-  #}else{
-    load(DataDir('cf_genesets/cfCodims.RData'))
-  #}
-
-  if(calcCodims){
-    out = NULL
-    for(codimName in names(cfCodims)){
-      print(toupper(codimName))
-      querySig = list(UP=cfCodims[[codimName]])
-      print(system.time(out[[codimName]] <- computeCsOnCmap(querySig, nPerm=nPerm, csMetric=csMetric,
-                                                            debug=debug, debugN=debugN, database=database)))
-    }
-    codimScores = MergeDfList(out, by='compound', allRows=TRUE, allSuffixes=TRUE)
-    save(codimScores, file=sprintf('%s/codimScores_%s.RData', outDir, database))
-  }else{
-    load(sprintf('%s/codimScores_%s.RData', outDir, database))
-  }
-
-  ####################################################################################################
   ### Merge all scores and add some finishing touches
   ####################################################################################################
 
-  scoreList = list(sig=sigScores, pathway=pathwayScores, codim=codimScores)
+  scoreList = list(sig=sigScores, pathway=pathwayScores)
   allScores = MergeDfList(scoreList, by='compound', allRows=TRUE, allSuffixes=TRUE)
 
-  #minPNames = paste0('adjP.', c(paste0(names(metaCore), '.pathway'), paste0(names(cfCodims), '.codim')))
+  #minPNames = paste0('adjP.', c(paste0(names(metaCore), '.pathway')))
   allScores = ComputeFinalScores(allScores)
   allScores = PostProcessIds(allScores, database)
   #allScores = AppendAnnotation(allScores, database)
@@ -134,7 +114,7 @@ ComputeAllScores = function(csMetric='ks', database='cmap', debug=FALSE, debugN=
   simpleScores = SubsetAllScoresColumns(allScores, database=database)
 
   if(saveRData){
-    save(sigScores, pathwayScores, codimScores, allScores, simpleScores,
+    save(sigScores, pathwayScores, allScores, simpleScores,
          file=sprintf('%s/allScores_%s.RData', outDir, database))
   }
 }
@@ -699,11 +679,10 @@ AppendMinP = function(df, colNames, varName, nCol=length(colNames), minus=0){
   return(df)
 }
 
-TestDebugQuery = function(database, csMetric, newSigScores, newPathwayScores, newCodimScores, newAllScores){
+TestDebugQuery = function(database, csMetric, newSigScores, newPathwayScores, newAllScores){
   load(OutputDir(sprintf('drug_rankings/meta3/internal/newPRLs/debugSave/%s/allScores_%s.RData', csMetric, database)))
   stopifnot(identical(sigScores, newSigScores))
   stopifnot(identical(pathwayScores, newPathwayScores))
-  stopifnot(identical(codimScores, newCodimScores))
   stopifnot(identical(allScores, newAllScores))
 }
 
@@ -740,7 +719,7 @@ SubsetAllScoresColumns = function(allScores, database, extras=TRUE, orderBy=NULL
 
   if(extras){
     idxPmin = which(grepl('pmin|fdr.consensus', names(allScores)))
-    idxAdjP = which(grepl('adjPvalue.*pathway|adjPvalue.*codim', names(allScores)))
+    idxAdjP = which(grepl('adjPvalue.*pathway', names(allScores)))
     idxReason = which(grepl('reasonForFiltering', names(allScores)))
   }else{
     idxPmin = c()
