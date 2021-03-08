@@ -1,3 +1,3 @@
 CODEPATH=/Users/rhodos/Desktop/Projects/cf/cfdrug/cfdrug/
 DATAPATH=/Users/rhodos/Desktop/Projects/cf/cfdrug/input/
-OUTPATH=/Users/rhodos/Desktop/Projects/cf/cfdrug/example_output/
+OUTPATH=/Users/rhodos/Desktop/Projects/cf/cfdrug/example/
