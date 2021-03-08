@@ -71,8 +71,3 @@ for(database in c('cmap', 'lincs')){
   dev.off()
 
 }
-
-### Now, let's read in full CF corrector spreadsheet and create a spreadsheet with the 15 compounds that I'm using
-#C = data.frame(ReadXLS('/Users/rhodos/Desktop/Research/drug_repurposing/data/cf/known_cf_drugs.xlsx')$Sheet1)
-#correctors = subset(C, grepl('corrector', cf_moa))
-#Write2XLS(correctors, file=PlotDir('known_cf_correctors_in_cmap.xlsx'))

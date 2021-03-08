@@ -232,9 +232,9 @@ XSum_allCmap = function(querySig, nPerm, numDrugGenes=500, data='FC', takeAbs=FA
   }else if(database=='lincs'){
     load(DataDir('lincs_mean_zscores.RData'))
     if(debug && debugN<=5){
-      load('/la-forge/rhodos/projects/drug_repurposing/data/lincs/PRL_entrez_lincs_cell_specific_debug.RData')
+      load(DataDir('PRL_entrez_lincs_cell_specific_debug.RData'))
     }else{
-      load('/la-forge/rhodos/projects/drug_repurposing/data/lincs/PRL_entrez_lincs_cell_specific_plusCF.RData')
+      load(DataDir('PRL_entrez_lincs_cell_specific_plusCF.RData'))
     }
     drugData = PRL_entrez
     drugDataVec = rev(zMean) # reversing so that the first entry of drugDataVec is the largest z-score, 
@@ -424,10 +424,10 @@ CS_entrez = function(querySig, nPerm, debug=FALSE, debugN=NULL, csMetric='ks', n
     }
   }else if(database=='lincs'){
     if(debug){
-      load('/la-forge/rhodos/projects/drug_repurposing/data/lincs/PRL_entrez_lincs_cell_specific_debug.RData')
+      load(DataDir('PRL_entrez_lincs_cell_specific_debug.RData'))
     }else{
       cat('loading LINCS PRL file...\n')
-      print(system.time(load('/la-forge/rhodos/projects/drug_repurposing/data/lincs/PRL_entrez_lincs_cell_specific_plusCF.RData')))
+      print(system.time(load(DataDir('PRL_entrez_lincs_cell_specific_plusCF.RData'))))
     } 
   }
 

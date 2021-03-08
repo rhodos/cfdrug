@@ -33,8 +33,6 @@ collectionGsea = function(collectionOfGeneSets, geneList, exponent = 1, nPermuta
                                         collectionOfGeneSets = collectionOfGeneSets[which(tagGeneSets)],
                                         exponent = exponent, nPermutations = nPermutations)
       sapply(1:n.tagGeneSets, function(i) {
-        #scoresperm[i, ] <<- unlist(scores["scoresperm", i])
-        #scoresObserved[i] <<- unlist(scores["scoresObserved", i])
         scoresperm[i, ] <<- unlist(scores[[i]]$scoresperm)
         scoresObserved[i] <<- unlist(scores[[i]]$scoresObserved)
       })
@@ -106,10 +104,6 @@ gseaScoresBatchParallel = function(geneList, geneNames.perm, collectionOfGeneSet
                         geneSet = as.integer(collectionOfGeneSets[[i]]),
                         exponent = exponent, nPermutations = nPermutations)
   }
-  # scores <- parSapply(getOption("cluster"), 1:length(collectionOfGeneSets),
-  #                     function(i) { gseaScoresBatchLocal(geneList, geneNames.perm = geneNames.perm,
-  #                                            geneSet = as.integer(collectionOfGeneSets[[i]]),
-  #                                            exponent = exponent, nPermutations = nPermutations)})
   return(scores)
 }
 

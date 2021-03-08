@@ -73,11 +73,13 @@ for(pert_id in rownames(finalSigs)){
   up = sort(-x)[1:nDEG] %>% names
   down = sort(x)[1:nDEG] %>% names
 
-  UP = RunGsea(x, dz_genes_up=up, dz_genes_down=NULL, minGeneSetSize=minGenes, nPermute=1000, seed=123,
+  # Run hypergeometric (Fisher's exact test) enrichment analysis on each up-regulated gene set 
+  UP = RunGsea(x, dz_genes_up=up, dz_genes_down=NULL, minGeneSetSize=minGenes, nPermute=1000, seed=123, 
                           doGSOA=TRUE, doGSEA=FALSE, ListGSC = gmt, appendTerms=FALSE, preprocess=TRUE) %>%
     GetGSEAResults(colname='Adjusted.Pvalue', thresh=pThresh, analysis='GSOA', merge=TRUE) %>% FilterGSOARes %>%
     mutate(dirxn='UP')
 
+  # Run hypergeometric (Fisher's exact test) enrichment analysis on each down-regulated gene set 
   DOWN= RunGsea(x, dz_genes_up=down, dz_genes_down=NULL, minGeneSetSize=minGenes, nPermute=1000, seed=123,
                           doGSOA=TRUE, doGSEA=FALSE, ListGSC = gmt, appendTerms=FALSE, preprocess=TRUE) %>%
     GetGSEAResults(colname='Adjusted.Pvalue', thresh=pThresh, analysis='GSOA', merge=TRUE) %>% FilterGSOARes
@@ -93,7 +95,7 @@ all %<>% lapply(function(x) x %>% arrange(Adjusted.Pvalue))
 Write2XLS('all', file=PlotDir('CFBE_hits_and_nonhits_hypergeometric_enrichments.xlsx'))
 save(all, file=PlotDir('CFBE_hits_and_nonhits_hypergeometric_enrichments.RData'))
 
-# Grab the top K enrichments from each hit compound (hits only!)
+# Identify the top 10 enrichments from each hit compound (hits only!)
 K = 10
 topResults = lapply(hit_names, function(nm){x=all[[nm]][1:K,]; x$drug=nm; return(x)})
 R = Reduce('rbind', topResults) %>% unite('Term_with_dirxn', Term, dirxn, remove=FALSE) %>% as.data.frame
