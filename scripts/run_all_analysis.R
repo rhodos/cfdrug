@@ -6,9 +6,10 @@ library(dplyr)
 source('src/Utils.R')
 source('src/DrugRank.R')
 source('src/CMAP.R')
+source('src/GSEA.R')
 
 # compound signature ranking
-#source('scripts/run_all_drug_scores.R')
+source('scripts/run_all_drug_scores.R')
 
 # final compound selection
 source('scripts/get_top_drugs.R')

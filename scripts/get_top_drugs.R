@@ -27,8 +27,7 @@ cmapDrugsFlat = unique(unlist(cmapDrugList))
 lincsDrugsFlat = unique(unlist(lincsDrugList))
 
 colNames = c('top_cell_score.ks', 'multi_cell_score.ks','top_cell_score.xsum', 'multi_cell_score.xsum',
-'best.sig.ks', 'best.sig.xsum', 'best.pathway.ks', 'best.pathway.xsum','cell_type.ks', 'cell_type.xsum',
-'celltypes_and_rank.ks','celltypes_and_rank.xsum')
+'best.sig.ks', 'best.sig.xsum', 'best.pathway.ks', 'best.pathway.xsum','cell_type.ks', 'cell_type.xsum')
 
 ### construct cmap selection df
 
@@ -89,31 +88,14 @@ cmap$matching.lincs.ids.in.top = unlist(lapply(topMatchList, function(x) paste0(
 
 lincsDups = lincs$pert_iname[which(duplicated(lincs$pert_iname))]
 
-if(FALSE){  
-  filenames = c('lincs_top_cell_scores.png', 'lincs_multi_cell_scores.png', 'cmap_top_cell_scores.png', 'cmap_multi_cell_scores.png')
-  if(!is.null(perc2)){
-    filenames = paste0(sprintf('%.2f', perc2), filenames)
-  }
-  venn.diagram(lincsDrugList[1:2], filename=filenames[1], 
-               fill=c('red', 'blue'), imagetype='png', scaled=F, cex=2, cat.position=c(0,0))
-  
-  venn.diagram(lincsDrugList[3:4], filename=filenames[2],
-               fill=c('yellow', 'green'), imagetype='png', scaled=F, cex=2, cat.position=c(0,0))
-  
-  venn.diagram(cmapDrugList[1:2], filename=filenames[3],
-               fill=c('red', 'blue'), imagetype='png', scaled=F, cex=2, cat.position=c(0,0))
-  
-  venn.diagram(cmapDrugList[3:4],filename=filenames[4], 
-               fill=c('yellow', 'green'), imagetype='png', scaled=F, cex=2, cat.position=c(0,0))
-}
-
+## save to file
 x = list(cmap=cmap, lincs=FixBackSlashes(lincs))
-WriteXLS('x', ExcelFileName='CF_drugList.xlsx', 
+WriteXLS('x', ExcelFileName=OutputDir('drug_rankings/CF_drugList.xlsx'), 
          row.names=TRUE, col.names=TRUE, AdjWidth=FALSE,
          BoldHeaderRow=TRUE, FreezeRow=1, FreezeCol=1)
 
 y = list(cmap=cmap.all, lincs=FixBackSlashes(lincs.all))
-WriteXLS('y', ExcelFileName='CF_drugList_allScores.xlsx', 
+WriteXLS('y', ExcelFileName=OutputDir('drug_rankings/CF_drugList_allScores.xlsx'), 
          row.names=TRUE, col.names=TRUE, AdjWidth=FALSE, 
          BoldHeaderRow=TRUE, FreezeRow=1, FreezeCol=1)
 

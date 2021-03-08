@@ -5,7 +5,10 @@ library(forcats)
 
 set.seed(123)
 
-# This script performs "in silico evaluation" of the connectivity scores using 15 corrector compounds that are represented in these databases. This version of the script looks at the individual pathway and signatures scores as well as the overall score, to try to make a case for data integration
+# This script performs "in silico evaluation" of the connectivity scores using 15 corrector
+# compounds that are represented in these databases. This version of the script looks at the
+# individual pathway and signatures scores as well as the overall score, to try to make a 
+# case for data integration
 
 out = list()
 for(database in c('cmap','lincs')){
@@ -74,14 +77,13 @@ out[[metric]][[database]] = cbind(ES,p)
 }}
 
 # Make a dotplot
-M = melt(out) %>% spread(X2, value) %>% setNames(c('score_column', 'database','metric','ES','pval'))
+M = melt(out) %>% spread(Var2, value) %>% setNames(c('score_column', 'database','metric','ES','pval'))
 M$score_column %<>% factor(levels=c('CellConsensus','CellSpecific','DISEASE_RAW','DISEASE_ABS',
                                  'COLD_SHOCK', 'RNAi', 'CLATHRIN','DEGRADATION','ER2GOLGI',
                                  'FOLDING','LYSOSOME','MEMBRANE','NITRO','SORTING','TRAFFIC'))
 M$score_column %<>% fct_recode('CELL_CONSENSUS'='CellConsensus', 'CELL_SPECIFIC'='CellSpecific')
 M$db_metric = factor(paste(M$database %>% toupper, M$metric %>% toupper, sep=', '),
                      levels=rev(c('LINCS, XSUM', 'LINCS, KS', 'CMAP, XSUM', 'CMAP, KS')))
-load('~/Desktop/Box/CFDR/cfdr/code/plot/2018_04_25/ES_all_drug_rankings.RData')
 
 ggplot(M, aes(x=score_column, y=db_metric)) +
   geom_point(aes(colour=ES, size=-log10(pval))) +
@@ -90,5 +92,5 @@ ggplot(M, aes(x=score_column, y=db_metric)) +
   xlab('') + ylab('') +
   theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1))
 
-ggsave(PlotDir('ES_all_drug_rankings.pdf'), width=6.5, height=4)
-#save(M, file=PlotDir('ES_all_drug_rankings.RData'))
+ggsave(PlotDir('in_silico_validation_dotplot.pdf'), width=6.5, height=4)
+save(M, file=OutputDir('in_silico_data_for_dotplot.RData'))

@@ -1,18 +1,13 @@
-#rm(list=ls())
-#setwd('/Users/rhodos/Desktop/Box/CFDR/cfdr/code')
-#testAll = FALSE
-#source('R/init.R')
-
 library(tidyr)
 library(magrittr)
 library(forcats)
+library(data.table)
 
-load(DataDir('drug_sigs/tested_compounds/public_L1000_data_CD/sigBing.RData'))
-load(DataDir('drug_sigs/tested_compounds/public_L1000_data_CD/sigInfo.RData'))
+load(DataDir('lincs_signatures_bing_genes_tested_compounds.RData'))
+load(DataDir('lincs_info_bing_genes_tested_compounds.RData'))
 
 ##### Load drug metadata
-load(DataDir('compiled_data/drugData.RData'))
-drugData = subset(drugData, metadata$screen == 'Mt. Sinai')
+load(DataDir('tested_compound_data_and_metadata.RData'))
 map = drugData$metadata
 
 ##### Identify 8 CFBE hits from this data
@@ -43,10 +38,6 @@ info = sigInfo[idxSelect,]
 sigs = sigBing[idxSelect,]
 info$hit = c(rep('hit', length(which(hitSelect))), rep('non-hit', length(which(nohitSelect))))
 
-# Filter signatures to only p-values < 0.05, only epithelial cells
-#info %<>% subset(pvalue<0.05 & epth=='EPTH')
-#sigs = sigs[rownames(info),]
-
 # Average per drug/cell combination
 nGenes = ncol(sigs)
 sigs$pert_id = info$pert_id
@@ -67,7 +58,7 @@ finalSigs = M[, lapply(.SD, mean), by=list(pert_id), .SDcols=names(sigs)[1:nGene
 finalSigs = finalSigs %>% as.data.frame
 
 # load gmt
-load(DataDir('gmt/gmt_cftr_v4.RData'))
+load(DataDir('gmt_gene_sets_for_enrichment.RData'))
 
 nDEG = 200
 minGenes = 5
@@ -97,22 +88,19 @@ for(pert_id in rownames(finalSigs)){
   if(!is.null(DOWN)){all[[name]] %<>% rbind(DOWN)}
 }
 
-# # Filter to include only most significant for each direction
-#all %<>% lapply(function(x) x %>% group_by(Term) %>% filter(Adjusted.Pvalue==min(Adjusted.Pvalue)) %>% arrange(Adjusted.Pvalue))
-
-# Actually just order by adjusted.pvalue
+# Order by adjusted.pvalue
 all %<>% lapply(function(x) x %>% arrange(Adjusted.Pvalue))
 Write2XLS('all', file=PlotDir('CFBE_hits_and_nonhits_hypergeometric_enrichments.xlsx'))
 save(all, file=PlotDir('CFBE_hits_and_nonhits_hypergeometric_enrichments.RData'))
 
-# Grab the top K enrichments from each hit compound (hits only!) and see how many that gives me in total
+# Grab the top K enrichments from each hit compound (hits only!)
 K = 10
 topResults = lapply(hit_names, function(nm){x=all[[nm]][1:K,]; x$drug=nm; return(x)})
 R = Reduce('rbind', topResults) %>% unite('Term_with_dirxn', Term, dirxn, remove=FALSE) %>% as.data.frame
 termCounts = R$Term_with_dirxn %>% table
 selectedTerms = names(which(termCounts>1))
 
-# But I want to plot all the scores for these selected terms, not just if they are only in the top K for that drug
+# Plot all the scores for these selected terms, not just if they are only in the top K for that drug
 allResults = lapply(names(all), function(nm){x=all[[nm]]; x$drug=nm; x$hit=(nm %in% hit_names); return(x)})
 R2 = Reduce('rbind', allResults) %>% unite('Term_with_dirxn', Term, dirxn, remove=FALSE) %>% as.data.frame
 R2$drug %<>% as.factor %>% fct_reorder(R2$hit)
@@ -148,6 +136,3 @@ ggplot(R4, aes(x=Term_with_dirxn, y=FoldEnrichment, group=interaction(hit, Term_
   geom_boxplot() + theme_bw() + theme(text=element_text(size=12), axis.text.x=element_text(angle=45, hjust=1))
 ggsave(PlotDir('hit_v_nonhit_significant_pathways.svg'), width=5.5, height=7) # use this one for the plot
 ggsave(PlotDir('hit_v_nonhit_significant_pathways.pdf'), width=5.5, height=7) # use this one for the labels
-
-
-# Compare hits and non-hits on UPR genes in PERK-mediated UPR
